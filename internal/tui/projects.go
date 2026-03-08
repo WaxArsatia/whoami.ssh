@@ -1,7 +1,6 @@
 package tui
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
@@ -81,13 +80,7 @@ func buildProjectCard(p data.Project, w int) string {
 		Padding(0, 1).
 		Render(p.Lang)
 
-	// Stars
-	stars := ""
-	if p.Stars > 0 {
-		stars = "  " + DimStyle.Render(fmt.Sprintf("★ %d", p.Stars))
-	}
-
-	titleRow := ProjectTitleStyle.Render(p.Name) + "  " + lang + stars
+	titleRow := ProjectTitleStyle.Render(p.Name) + "  " + lang
 
 	// Description
 	desc := lipgloss.NewStyle().Foreground(colTextDim).Render(p.Description)

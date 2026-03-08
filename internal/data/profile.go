@@ -81,7 +81,6 @@ type Project struct {
 	Description string
 	Lang        string
 	URL         string
-	Stars       int
 	Tags        []string
 }
 
@@ -91,7 +90,6 @@ var Projects = []Project{
 		Description: "SSH over WebSocket tunnel — bridges SSH connections through WebSocket, enabling SSH in environments where only HTTP/S is allowed.",
 		Lang:        "Rust",
 		URL:         "github.com/WaxArsatia/SSHWS-Rust",
-		Stars:       1,
 		Tags:        []string{"ssh", "websocket", "networking", "rust"},
 	},
 	{
@@ -99,7 +97,6 @@ var Projects = []Project{
 		Description: "AI-powered tool that converts pseudocode (Indonesian academic format) into runnable C++ code, built with Next.js and OpenAI.",
 		Lang:        "TypeScript",
 		URL:         "github.com/WaxArsatia/pseudocode-converter",
-		Stars:       0,
 		Tags:        []string{"ai", "nextjs", "typescript", "education"},
 	},
 	{
@@ -107,7 +104,6 @@ var Projects = []Project{
 		Description: "Interactive math problem-solving platform built with Next.js, featuring step-by-step solutions and LaTeX rendering.",
 		Lang:        "TypeScript",
 		URL:         "github.com/WaxArsatia/next-overmath",
-		Stars:       0,
 		Tags:        []string{"math", "nextjs", "typescript", "education"},
 	},
 	{
@@ -115,7 +111,6 @@ var Projects = []Project{
 		Description: "Feature-rich Discord bot for community management with moderation, utilities, and automated workflows.",
 		Lang:        "TypeScript",
 		URL:         "github.com/WaxArsatia/auctores-discord-bot",
-		Stars:       0,
 		Tags:        []string{"discord", "bot", "typescript", "automation"},
 	},
 	{
@@ -123,7 +118,6 @@ var Projects = []Project{
 		Description: "This SSH portfolio app! An interactive terminal portfolio served over SSH, built with charmbracelet/wish and Bubble Tea.",
 		Lang:        "Go",
 		URL:         "github.com/WaxArsatia/whoami.ssh",
-		Stars:       0,
 		Tags:        []string{"go", "ssh", "tui", "portfolio", "bubbletea"},
 	},
 }
