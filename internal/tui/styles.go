@@ -7,161 +7,131 @@ import "github.com/charmbracelet/lipgloss"
 // ───────────────────────────────────────────────────────────────────────────
 
 const (
-	colBg       = lipgloss.Color("#0b0e14") // background
-	colSurface  = lipgloss.Color("#131721") // slightly lifted surface
-	colOverlay  = lipgloss.Color("#1e232b") // normal black
-	colMuted    = lipgloss.Color("#3d424d") // mid-tone
-	colSubtle   = lipgloss.Color("#686868") // bright black
-	colText     = lipgloss.Color("#bfbdb6") // foreground
-	colTextDim  = lipgloss.Color("#8a9199") // dimmed foreground
-	colCyan     = lipgloss.Color("#95e6cb") // bright cyan
-	colBlue     = lipgloss.Color("#59c2ff") // bright blue
-	colPurple   = lipgloss.Color("#d2a6ff") // bright magenta
-	colPink     = lipgloss.Color("#f07178") // bright red
-	colGreen    = lipgloss.Color("#aad94c") // bright green
-	colYellow   = lipgloss.Color("#ffb454") // bright yellow
-	colOrange   = lipgloss.Color("#f9af4f") // normal yellow (orange in Ayu)
-	colTeal     = lipgloss.Color("#90e1c6") // normal cyan
-	colWhite    = lipgloss.Color("#ffffff") // bright white
+	colBg      = lipgloss.Color("#0b0e14")
+	colSurface = lipgloss.Color("#131721")
+	colOverlay = lipgloss.Color("#1e232b")
+	colMuted   = lipgloss.Color("#3d424d")
+	colSubtle  = lipgloss.Color("#686868")
+	colText    = lipgloss.Color("#bfbdb6")
+	colTextDim = lipgloss.Color("#8a9199")
+	colCyan    = lipgloss.Color("#95e6cb")
+	colBlue    = lipgloss.Color("#59c2ff")
+	colPurple  = lipgloss.Color("#d2a6ff")
+	colPink    = lipgloss.Color("#f07178")
+	colGreen   = lipgloss.Color("#aad94c")
+	colYellow  = lipgloss.Color("#ffb454")
+	colOrange  = lipgloss.Color("#f9af4f")
+	colTeal    = lipgloss.Color("#90e1c6")
+	colWhite   = lipgloss.Color("#ffffff")
 )
 
 // ───────────────────────────────────────────────────────────────────────────
-// Base styles
+// Per-session styles
 // ───────────────────────────────────────────────────────────────────────────
 
-var (
-	// Full-screen wrapper
-	AppStyle = lipgloss.NewStyle().
-		Background(colBg).
-		Foreground(colText)
+type Styles struct {
+	r *lipgloss.Renderer
 
-	// ── Tab bar ──────────────────────────────────────────────────────────────
+	App lipgloss.Style
 
-	TabBarStyle = lipgloss.NewStyle().
-		Background(colSurface).
-		Padding(0, 1)
+	TabBar     lipgloss.Style
+	Tab        lipgloss.Style
+	ActiveTab  lipgloss.Style
+	TabDivider lipgloss.Style
 
-	TabStyle = lipgloss.NewStyle().
-		Foreground(colSubtle).
-		Padding(0, 2)
+	StatusBar  lipgloss.Style
+	StatusKey  lipgloss.Style
+	StatusDesc lipgloss.Style
 
-	ActiveTabStyle = lipgloss.NewStyle().
-		Foreground(colCyan).
-		Bold(true).
-		Padding(0, 2).
-		Underline(true)
+	Content lipgloss.Style
 
-	TabDividerStyle = lipgloss.NewStyle().
-		Foreground(colMuted)
+	SectionTitle    lipgloss.Style
+	SectionSubtitle lipgloss.Style
 
-	// ── Status bar ───────────────────────────────────────────────────────────
+	Banner    lipgloss.Style
+	Highlight lipgloss.Style
+	Accent    lipgloss.Style
 
-	StatusBarStyle = lipgloss.NewStyle().
-		Background(colSurface).
-		Foreground(colSubtle).
-		Padding(0, 1)
+	Success lipgloss.Style
+	Warning lipgloss.Style
+	Dim     lipgloss.Style
+	Bold    lipgloss.Style
 
-	StatusKeyStyle = lipgloss.NewStyle().
-		Foreground(colCyan).
-		Background(colOverlay).
-		Padding(0, 1).
-		Margin(0, 1, 0, 0)
+	Box          lipgloss.Style
+	HighlightBox lipgloss.Style
 
-	StatusDescStyle = lipgloss.NewStyle().
-		Foreground(colSubtle)
+	ProjectTitle lipgloss.Style
+	ProjectLang  lipgloss.Style
+	ProjectURL   lipgloss.Style
+	Tag          lipgloss.Style
 
-	// ── Content area ─────────────────────────────────────────────────────────
+	Name   lipgloss.Style
+	Role   lipgloss.Style
+	Motto  lipgloss.Style
+	Prompt lipgloss.Style
+}
 
-	ContentStyle = lipgloss.NewStyle().
-		Padding(1, 3)
+func NewStyles(r *lipgloss.Renderer) Styles {
+	n := r.NewStyle
 
-	// ── Section headings ─────────────────────────────────────────────────────
+	return Styles{
+		r: r,
 
-	SectionTitleStyle = lipgloss.NewStyle().
-		Foreground(colCyan).
-		Bold(true).
-		MarginBottom(1)
+		App: n().Background(colBg).Foreground(colText),
 
-	SectionSubtitleStyle = lipgloss.NewStyle().
-		Foreground(colSubtle).
-		Italic(true)
+		// ── Tab bar ──────────────────────────────────────────────────────────
+		TabBar:     n().Background(colSurface).Padding(0, 1),
+		Tab:        n().Foreground(colSubtle).Padding(0, 2),
+		ActiveTab:  n().Foreground(colCyan).Bold(true).Padding(0, 2).Underline(true),
+		TabDivider: n().Foreground(colMuted),
 
-	// ── Banners & highlights ─────────────────────────────────────────────────
+		// ── Status bar ───────────────────────────────────────────────────────
+		StatusBar:  n().Background(colSurface).Foreground(colSubtle).Padding(0, 1),
+		StatusKey:  n().Foreground(colCyan).Background(colOverlay).Padding(0, 1).Margin(0, 1, 0, 0),
+		StatusDesc: n().Foreground(colSubtle),
 
-	BannerStyle = lipgloss.NewStyle().
-		Foreground(colCyan).
-		Bold(true)
+		// ── Content area ────────────────────────────────────────────────────
+		Content: n().Padding(1, 3),
 
-	HighlightStyle = lipgloss.NewStyle().
-		Foreground(colCyan)
+		// ── Section headings ─────────────────────────────────────────────────
+		SectionTitle:    n().Foreground(colCyan).Bold(true).MarginBottom(1),
+		SectionSubtitle: n().Foreground(colSubtle).Italic(true),
 
-	AccentStyle = lipgloss.NewStyle().
-		Foreground(colPink)
+		// ── Banners & highlights ─────────────────────────────────────────────
+		Banner:    n().Foreground(colCyan).Bold(true),
+		Highlight: n().Foreground(colCyan),
+		Accent:    n().Foreground(colPink),
 
-	SuccessStyle = lipgloss.NewStyle().
-		Foreground(colGreen)
+		// ── States ───────────────────────────────────────────────────────────
+		Success: n().Foreground(colGreen),
+		Warning: n().Foreground(colYellow),
+		Dim:     n().Foreground(colSubtle),
+		Bold:    n().Foreground(colText).Bold(true),
 
-	WarningStyle = lipgloss.NewStyle().
-		Foreground(colYellow)
+		// ── Boxes & borders ──────────────────────────────────────────────────
+		Box:          n().Border(lipgloss.RoundedBorder()).BorderForeground(colOverlay).Padding(1, 2),
+		HighlightBox: n().Border(lipgloss.RoundedBorder()).BorderForeground(colCyan).Padding(1, 2),
 
-	DimStyle = lipgloss.NewStyle().
-		Foreground(colSubtle)
+		// ── Project card ─────────────────────────────────────────────────────
+		ProjectTitle: n().Foreground(colBlue).Bold(true),
+		ProjectLang:  n().Foreground(colOrange).Italic(true),
+		ProjectURL:   n().Foreground(colSubtle).Italic(true),
+		Tag:          n().Foreground(colPurple).Background(colOverlay).Padding(0, 1).Margin(0, 1, 0, 0),
 
-	BoldStyle = lipgloss.NewStyle().
-		Foreground(colText).
-		Bold(true)
+		// ── Home-specific ─────────────────────────────────────────────────────
+		Name:   n().Foreground(colWhite).Bold(true),
+		Role:   n().Foreground(colTeal),
+		Motto:  n().Foreground(colSubtle).Italic(true),
+		Prompt: n().Foreground(colCyan),
+	}
+}
 
-	// ── Boxes & borders ──────────────────────────────────────────────────────
+func (s Styles) New() lipgloss.Style { return s.r.NewStyle() }
 
-	BoxStyle = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(colOverlay).
-		Padding(1, 2)
+// ───────────────────────────────────────────────────────────────────────────
+// Helpers
+// ───────────────────────────────────────────────────────────────────────────
 
-	HighlightBoxStyle = lipgloss.NewStyle().
-		Border(lipgloss.RoundedBorder()).
-		BorderForeground(colCyan).
-		Padding(1, 2)
-
-
-	// ── Project card ─────────────────────────────────────────────────────────
-
-	ProjectTitleStyle = lipgloss.NewStyle().
-		Foreground(colBlue).
-		Bold(true)
-
-	ProjectLangStyle = lipgloss.NewStyle().
-		Foreground(colOrange).
-		Italic(true)
-
-	ProjectURLStyle = lipgloss.NewStyle().
-		Foreground(colSubtle).
-		Italic(true)
-
-	TagStyle = lipgloss.NewStyle().
-		Foreground(colPurple).
-		Background(colOverlay).
-		Padding(0, 1).
-		Margin(0, 1, 0, 0)
-
-	// ── Home-specific ─────────────────────────────────────────────────────────
-
-	NameStyle = lipgloss.NewStyle().
-		Foreground(colWhite).
-		Bold(true)
-
-	RoleStyle = lipgloss.NewStyle().
-		Foreground(colTeal)
-
-	MottoStyle = lipgloss.NewStyle().
-		Foreground(colSubtle).
-		Italic(true)
-
-	PromptStyle = lipgloss.NewStyle().
-		Foreground(colCyan)
-)
-
-// LangColor returns a color for a programming language tag.
 func LangColor(lang string) lipgloss.Color {
 	switch lang {
 	case "Go":

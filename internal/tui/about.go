@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 
 	"github.com/WaxArsatia/whoami.ssh/internal/data"
 )
@@ -16,20 +15,22 @@ type aboutView struct {
 	ready    bool
 	width    int
 	height   int
+	styles   Styles
 }
 
-func newAboutView(w, h int) aboutView {
+func newAboutView(w, h int, st Styles) aboutView {
 	contentH := h - tabBarHeight - statusBarHeight
 	if contentH < 1 {
 		contentH = 24
 	}
 	vp := viewport.New(w, contentH)
-	vp.SetContent(buildAboutContent(w))
+	vp.SetContent(buildAboutContent(w, st))
 	return aboutView{
 		viewport: vp,
 		ready:    w > 0 && h > 0,
 		width:    w,
 		height:   h,
+		styles:   st,
 	}
 }
 
@@ -47,7 +48,7 @@ func (v aboutView) Update(msg tea.Msg) (aboutView, tea.Cmd) {
 		}
 		v.viewport.Width = msg.Width
 		v.viewport.Height = contentH
-		v.viewport.SetContent(buildAboutContent(msg.Width))
+		v.viewport.SetContent(buildAboutContent(msg.Width, v.styles))
 		v.ready = true
 	}
 	v.viewport, cmd = v.viewport.Update(msg)
@@ -58,23 +59,20 @@ func (v aboutView) View() string {
 	return v.viewport.View()
 }
 
-func buildAboutContent(w int) string {
+func buildAboutContent(w int, st Styles) string {
 	p := data.Me
 	var sb strings.Builder
 
-	// ── Header ──────────────────────────────────────────────────────────────
 	sb.WriteString("\n")
-	sb.WriteString(SectionTitleStyle.Render("  $ cat profile.toml") + "\n\n")
+	sb.WriteString(st.SectionTitle.Render("  $ cat profile.toml") + "\n\n")
 
-	// Profile card
 	cardW := minInt(w-6, 72)
-	card := buildProfileCard(p, cardW)
+	card := buildProfileCard(p, cardW, st)
 	sb.WriteString(card + "\n\n")
 
-	// ── About entries ────────────────────────────────────────────────────────
-	sb.WriteString(SectionTitleStyle.Render("  # highlights") + "\n\n")
+	sb.WriteString(st.SectionTitle.Render("  # highlights") + "\n\n")
 	for i, item := range p.About {
-		icon := getAboutIcon(i)
+		icon := getAboutIcon(i, st)
 		line := fmt.Sprintf("  %s  %s\n", icon, item)
 		sb.WriteString(line)
 	}
@@ -83,7 +81,7 @@ func buildAboutContent(w int) string {
 	return sb.String()
 }
 
-func buildProfileCard(p data.Profile, w int) string {
+func buildProfileCard(p data.Profile, w int, st Styles) string {
 	rows := []struct{ key, val string }{
 		{"name", p.Name},
 		{"alias", p.Alias},
@@ -98,20 +96,20 @@ func buildProfileCard(p data.Profile, w int) string {
 
 	var lines []string
 	for _, r := range rows {
-		keyStr := lipgloss.NewStyle().Foreground(colCyan).Width(12).Render(r.key)
-		sep := DimStyle.Render(" = ")
-		valStr := lipgloss.NewStyle().Foreground(colText).Render(r.val)
+		keyStr := st.New().Foreground(colCyan).Width(12).Render(r.key)
+		sep := st.Dim.Render(" = ")
+		valStr := st.New().Foreground(colText).Render(r.val)
 		lines = append(lines, fmt.Sprintf("  %s%s%s", keyStr, sep, valStr))
 	}
 
-	box := BoxStyle.Width(w).Render(strings.Join(lines, "\n"))
+	box := st.Box.Width(w).Render(strings.Join(lines, "\n"))
 	return box
 }
 
-func getAboutIcon(i int) string {
+func getAboutIcon(i int, st Styles) string {
 	icons := []string{"🔧", "🦀", "🐹", "🌐", "🐧", "📦", "🚀"}
 	if i < len(icons) {
-		return AccentStyle.Render(icons[i])
+		return st.Accent.Render(icons[i])
 	}
-	return AccentStyle.Render("•")
+	return st.Accent.Render("•")
 }

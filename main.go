@@ -76,6 +76,8 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		return nil, nil
 	}
 
-	m := tui.New(pty.Window.Width, pty.Window.Height)
+	renderer := bubbletea.MakeRenderer(s)
+
+	m := tui.New(pty.Window.Width, pty.Window.Height, renderer)
 	return m, []tea.ProgramOption{tea.WithAltScreen()}
 }

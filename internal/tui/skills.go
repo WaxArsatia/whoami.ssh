@@ -15,20 +15,22 @@ type skillsView struct {
 	ready    bool
 	width    int
 	height   int
+	styles   Styles
 }
 
-func newSkillsView(w, h int) skillsView {
+func newSkillsView(w, h int, st Styles) skillsView {
 	contentH := h - tabBarHeight - statusBarHeight
 	if contentH < 1 {
 		contentH = 24
 	}
 	vp := viewport.New(w, contentH)
-	vp.SetContent(buildSkillsContent(w))
+	vp.SetContent(buildSkillsContent(w, st))
 	return skillsView{
 		viewport: vp,
 		ready:    w > 0 && h > 0,
 		width:    w,
 		height:   h,
+		styles:   st,
 	}
 }
 
@@ -46,7 +48,7 @@ func (v skillsView) Update(msg tea.Msg) (skillsView, tea.Cmd) {
 		}
 		v.viewport.Width = msg.Width
 		v.viewport.Height = contentH
-		v.viewport.SetContent(buildSkillsContent(msg.Width))
+		v.viewport.SetContent(buildSkillsContent(msg.Width, v.styles))
 		v.ready = true
 	}
 	v.viewport, cmd = v.viewport.Update(msg)
@@ -57,24 +59,23 @@ func (v skillsView) View() string {
 	return v.viewport.View()
 }
 
-func buildSkillsContent(w int) string {
+func buildSkillsContent(w int, st Styles) string {
 	var sb strings.Builder
 
 	sb.WriteString("\n")
-	sb.WriteString(SectionTitleStyle.Render("  $ cat tech-stack.json") + "\n\n")
+	sb.WriteString(st.SectionTitle.Render("  $ cat tech-stack.json") + "\n\n")
 
-	pillStyle := lipgloss.NewStyle().
+	pillStyle := st.New().
 		Foreground(colCyan).
 		Background(colOverlay).
 		Padding(0, 1).
 		MarginRight(1)
 
-	categoryStyle := lipgloss.NewStyle().
+	categoryStyle := st.New().
 		Foreground(colSubtle).
 		Bold(true)
 
 	for i, group := range data.TechStack {
-		// Category heading with subtle comment style
 		heading := categoryStyle.Render("  " + group.Category)
 		sb.WriteString(heading + "\n  ")
 

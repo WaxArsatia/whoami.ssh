@@ -1,4 +1,3 @@
-// Package tui provides the Bubble Tea TUI for the whoami.ssh SSH portfolio.
 package tui
 
 import (
@@ -55,6 +54,7 @@ type Model struct {
 	width    int
 	height   int
 	active   viewID
+	styles   Styles
 	home     homeView
 	about    aboutView
 	skills   skillsView
@@ -62,21 +62,21 @@ type Model struct {
 	contact  contactView
 }
 
-// New creates the root TUI model with given terminal dimensions.
-func New(w, h int) Model {
+func New(w, h int, r *lipgloss.Renderer) Model {
+	st := NewStyles(r)
 	return Model{
 		width:    w,
 		height:   h,
 		active:   viewHome,
-		home:     newHomeView(w, h),
-		about:    newAboutView(w, h),
-		skills:   newSkillsView(w, h),
-		projects: newProjectsView(w, h),
-		contact:  newContactView(w, h),
+		styles:   st,
+		home:     newHomeView(w, h, st),
+		about:    newAboutView(w, h, st),
+		skills:   newSkillsView(w, h, st),
+		projects: newProjectsView(w, h, st),
+		contact:  newContactView(w, h, st),
 	}
 }
 
-// ── tea.Model interface ───────────────────────────────────────────────────
 
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
@@ -97,7 +97,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.home.width = msg.Width
 		m.home.height = msg.Height - tabBarHeight - statusBarHeight
 
-		// Propagate to all sub-views
 		var cmd tea.Cmd
 		m.about, cmd = m.about.Update(msg)
 		cmds = append(cmds, cmd)
@@ -111,11 +110,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
-		// ── Global quit ───────────────────────────────────────────────────
 		case "q", "ctrl+c":
 			return m, tea.Quit
 
-		// ── Tab cycling ───────────────────────────────────────────────────
 		case "tab":
 			m.active = (m.active + 1) % viewCount
 			return m, nil
@@ -123,7 +120,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.active = (m.active - 1 + viewCount) % viewCount
 			return m, nil
 
-		// ── Direct jump ───────────────────────────────────────────────────
 		case "0":
 			m.active = viewHome
 			return m, nil
@@ -142,7 +138,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Delegate to active view
 	var cmd tea.Cmd
 	switch m.active {
 	case viewAbout:
@@ -166,13 +161,12 @@ func (m Model) View() string {
 	return m.renderTabBar() + "\n" + m.renderContent() + "\n" + m.renderStatusBar()
 }
 
-// ── Rendering ─────────────────────────────────────────────────────────────
 
 func (m Model) renderTabBar() string {
 	var parts []string
+	n := m.styles.New
 
-	// Logo
-	logo := lipgloss.NewStyle().
+	logo := n().
 		Foreground(colCyan).
 		Bold(true).
 		Background(colOverlay).
@@ -180,30 +174,28 @@ func (m Model) renderTabBar() string {
 		Render("whoami.ssh")
 
 	parts = append(parts, logo)
-	parts = append(parts, DimStyle.Background(colSurface).Render(" "))
+	parts = append(parts, m.styles.Dim.Background(colSurface).Render(" "))
 
 	for _, tab := range tabs {
 		if tab.id == viewHome {
-			continue // home is the logo
+			continue
 		}
 		var style lipgloss.Style
 		if tab.id == m.active {
-			style = ActiveTabStyle
+			style = m.styles.ActiveTab
 		} else {
-			style = TabStyle
+			style = m.styles.Tab
 		}
 		parts = append(parts, style.Background(colSurface).Render(tab.label))
 	}
 
-	// Fill the rest of the bar
 	bar := lipgloss.JoinHorizontal(lipgloss.Center, parts...)
-	filled := lipgloss.NewStyle().
+	filled := n().
 		Background(colSurface).
 		Width(m.width).
 		Render(bar)
 
-	// Bottom border
-	border := lipgloss.NewStyle().
+	border := n().
 		Foreground(colOverlay).
 		Render(strings.Repeat("─", m.width))
 
@@ -230,11 +222,11 @@ func (m Model) renderStatusBar() string {
 	scrollPct := m.scrollPercent()
 
 	left := fmt.Sprintf("  %s  %s",
-		DimStyle.Render("ssh"),
-		HighlightStyle.Render("github.com/WaxArsatia/whoami.ssh"),
+		m.styles.Dim.Render("ssh"),
+		m.styles.Highlight.Render("github.com/WaxArsatia/whoami.ssh"),
 	)
 
-	right := DimStyle.Render(fmt.Sprintf("%s  ", scrollPct))
+	right := m.styles.Dim.Render(fmt.Sprintf("%s  ", scrollPct))
 
 	pad := m.width - lipgloss.Width(left) - lipgloss.Width(right)
 	if pad < 0 {
@@ -243,7 +235,7 @@ func (m Model) renderStatusBar() string {
 
 	bar := left + strings.Repeat(" ", pad) + right
 
-	return lipgloss.NewStyle().
+	return m.styles.New().
 		Background(colSurface).
 		Foreground(colSubtle).
 		Width(m.width).
