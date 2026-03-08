@@ -501,7 +501,7 @@
           <p
             class="font-mono text-ayu-muted text-xs uppercase tracking-widest mb-3"
           >
-            ── Connect via SSH — whoami.denis.my.id
+            ── Connect via SSH — denis.my.id
           </p>
           <div x-data="{ copied: false }" class="term-window max-w-xl">
             <div class="term-titlebar">
@@ -520,12 +520,12 @@
                   <span class="prompt-host">local</span>
                   <span class="prompt-sign"> $</span>
                   <span class="text-ayu-white ml-2 font-bold"
-                    >ssh whoami.denis.my.id</span
+                    >ssh denis.my.id</span
                   >
                 </div>
                 <button
                   @click="
-                  navigator.clipboard.writeText('ssh whoami.denis.my.id');
+                  navigator.clipboard.writeText('ssh denis.my.id');
                   copied = true;
                   setTimeout(() => copied = false, 2000)
                 "

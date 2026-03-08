@@ -4,13 +4,13 @@
 
 ## Live
 
-|         |                                                          |
-| ------- | -------------------------------------------------------- |
-| **Web** | [https://whoami.denis.my.id](https://whoami.denis.my.id) |
-| **SSH** | `ssh whoami.denis.my.id`                                 |
+|         |                                            |
+| ------- | ------------------------------------------ |
+| **Web** | [https://denis.my.id](https://denis.my.id) |
+| **SSH** | `ssh denis.my.id`                          |
 
 ```bash
-ssh whoami.denis.my.id
+ssh denis.my.id
 ```
 
 ## Features
