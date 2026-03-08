@@ -33,7 +33,7 @@ w := v.width
 var banner string
 if w >= 55 {
 bannerStyle := lipgloss.NewStyle().Foreground(colCyan).Bold(true)
-suffix := lipgloss.NewStyle().Foreground(colBlue).Bold(true).Render(".sh")
+suffix := lipgloss.NewStyle().Foreground(colBlue).Bold(true).Render(".ssh")
 banner = bannerStyle.Render(asciiArt) + "\n" +
 lipgloss.NewStyle().MarginLeft(44).Render(suffix)
 } else {
