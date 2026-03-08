@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth" style="color-scheme: dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +9,7 @@
       content="An interactive SSH portfolio terminal. Connect from your terminal and explore the work of Denis Arsyatya — Backend Developer · Network Engineer · Linux SysAdmin."
     />
     <meta name="author" content="Denis Arsyatya (WaxArsatia)" />
+    <meta name="theme-color" content="#0F1419" />
     <meta
       property="og:title"
       content="whoami.ssh — Interactive SSH Portfolio"
@@ -244,8 +245,17 @@
         padding: 3px 10px;
         border-radius: 4px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition:
+          background 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease,
+          color 0.2s ease;
+        touch-action: manipulation;
         flex-shrink: 0;
+      }
+      .copy-btn:focus-visible {
+        outline: 2px solid var(--c-cyan);
+        outline-offset: 2px;
       }
       .copy-btn:hover {
         background: rgba(54, 208, 208, 0.12);
@@ -326,7 +336,9 @@
         background: rgba(115, 184, 255, 0.08);
         border: 1px solid rgba(115, 184, 255, 0.2);
         color: var(--c-blue);
-        transition: all 0.2s;
+        transition:
+          background 0.2s,
+          box-shadow 0.2s;
         white-space: nowrap;
       }
       .tech-badge:hover {
@@ -349,6 +361,40 @@
       }
       .prompt-sign {
         color: var(--c-orange);
+      }
+
+      /* ── Nav link focus ──────────────────────────────── */
+      nav a:focus-visible {
+        outline: 2px solid var(--c-cyan);
+        outline-offset: 3px;
+        border-radius: 3px;
+      }
+
+      /* ── Scroll margin for fixed nav (~68 px) ───────── */
+      #connect,
+      #features {
+        scroll-margin-top: 80px;
+      }
+
+      /* ── Balance headings ────────────────────────────── */
+      h1,
+      h2 {
+        text-wrap: balance;
+      }
+
+      /* ── Reduced motion ──────────────────────────────── */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        .fade-up {
+          opacity: 1;
+          transform: none;
+        }
       }
 
       /* ── Fade-up stagger ────────────────────────────── */
@@ -515,11 +561,11 @@
             <div class="term-body">
               <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex-1 min-w-0">
-                  <span class="prompt-user">you</span>
-                  <span class="prompt-at">@</span>
-                  <span class="prompt-host">local</span>
-                  <span class="prompt-sign"> $</span>
-                  <span class="text-ayu-white ml-2 font-bold"
+                  <span class="prompt-user">you</span
+                  ><span class="prompt-at">@</span
+                  ><span class="prompt-host">local</span
+                  ><span class="prompt-sign"> $</span
+                  ><span class="text-ayu-white ml-2 font-bold"
                     >ssh denis.my.id</span
                   >
                 </div>
