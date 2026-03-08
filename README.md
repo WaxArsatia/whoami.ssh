@@ -2,8 +2,15 @@
 
 > An interactive SSH portfolio — visit it right from your terminal.
 
-```
-ssh -p 2222 <your-server-ip>
+## Live
+
+|         |                                                          |
+| ------- | -------------------------------------------------------- |
+| **Web** | [https://whoami.denis.my.id](https://whoami.denis.my.id) |
+| **SSH** | `ssh whoami.denis.my.id`                                 |
+
+```bash
+ssh whoami.denis.my.id
 ```
 
 ## Features
@@ -32,6 +39,9 @@ Section keys: `0` home · `1` about · `2` skills · `3` projects · `4` contact
 whoami.ssh/
 ├── main.go               # SSH server entry point (wish + bubbletea middleware)
 ├── go.mod
+├── frontend/
+│   ├── index.html        # Static web landing page (Tailwind + Alpine.js)
+│   └── nginx.conf        # Nginx config: HTTPS + HTTP/2 + HTTP/3 (QUIC)
 ├── internal/
 │   ├── data/
 │   │   └── profile.go    # Profile, TechStack, and Projects data
@@ -52,11 +62,18 @@ whoami.ssh/
 # Requires Go
 go run .
 
-# Connect (in another terminal)
+# Connect (in another terminal) — default port is 2222 locally
 ssh -p 2222 localhost
 ```
 
 > The SSH host key is auto-generated at `.ssh/id_ed25519` on first run.
+
+To run on the standard SSH port 22 (like production):
+
+```bash
+sudo go run . --port 22
+ssh localhost
+```
 
 ## Docker
 
@@ -69,13 +86,14 @@ RUN go build -o whoami.ssh .
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/whoami.ssh .
-EXPOSE 2222
-CMD ["./whoami.ssh"]
+EXPOSE 22
+CMD ["./whoami.ssh", "--port", "22"]
 ```
 
 ```bash
 docker build -t whoami-sh .
-docker run -p 2222:2222 whoami-sh
+# run on standard port 22
+docker run -p 22:22 whoami-sh
 ```
 
 ## Stack

@@ -1,0 +1,912 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>whoami.ssh — Denis Arsyatya · Interactive SSH Portfolio</title>
+    <meta
+      name="description"
+      content="An interactive SSH portfolio terminal. Connect from your terminal and explore the work of Denis Arsyatya — Backend Developer · Network Engineer · Linux SysAdmin."
+    />
+    <meta name="author" content="Denis Arsyatya (WaxArsatia)" />
+    <meta
+      property="og:title"
+      content="whoami.ssh — Interactive SSH Portfolio"
+    />
+    <meta
+      property="og:description"
+      content="Visit Denis Arsyatya's portfolio straight from your terminal via SSH."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Fonts: JetBrains Mono + Syne -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS CDN (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              mono: ['"JetBrains Mono"', "monospace"],
+              sans: ["Syne", "sans-serif"],
+            },
+            colors: {
+              ayu: {
+                bg: "#0F1419",
+                bg2: "#131921",
+                bg3: "#1a2230",
+                border: "#1e2a3a",
+                dim: "#3D4F5C",
+                muted: "#5C6773",
+                text: "#BFBDB6",
+                white: "#E6E1CF",
+                cyan: "#36D0D0",
+                blue: "#73B8FF",
+                orange: "#FF8F40",
+                yellow: "#FFB454",
+                green: "#7FD962",
+                red: "#F07178",
+                purple: "#D2A6FF",
+              },
+            },
+            animation: {
+              "cursor-blink": "blink 1.1s step-end infinite",
+              "fade-up": "fadeUp 0.7s ease forwards",
+              "glow-pulse": "glowPulse 3s ease-in-out infinite",
+              scanline: "scanline 8s linear infinite",
+            },
+            keyframes: {
+              blink: {
+                "0%, 100%": { opacity: "1" },
+                "50%": { opacity: "0" },
+              },
+              fadeUp: {
+                from: { opacity: "0", transform: "translateY(20px)" },
+                to: { opacity: "1", transform: "translateY(0)" },
+              },
+              glowPulse: {
+                "0%, 100%": { textShadow: "0 0 8px rgba(54,208,208,0.4)" },
+                "50%": {
+                  textShadow:
+                    "0 0 20px rgba(54,208,208,0.8), 0 0 40px rgba(54,208,208,0.3)",
+                },
+              },
+              scanline: {
+                from: { backgroundPosition: "0 0" },
+                to: { backgroundPosition: "0 100%" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Alpine.js for copy-to-clipboard -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <style>
+      /* ── Base ─────────────────────────────────────────── */
+      * {
+        box-sizing: border-box;
+      }
+
+      :root {
+        --c-bg: #0f1419;
+        --c-bg2: #131921;
+        --c-border: #1e2a3a;
+        --c-cyan: #36d0d0;
+        --c-orange: #ff8f40;
+        --c-blue: #73b8ff;
+        --c-muted: #5c6773;
+        --c-text: #bfbdb6;
+        --c-white: #e6e1cf;
+      }
+
+      body {
+        background-color: var(--c-bg);
+        color: var(--c-text);
+        font-family: "Syne", sans-serif;
+        overflow-x: hidden;
+      }
+
+      /* ── Grid noise texture overlay ─────────────────── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(255, 255, 255, 0.012) 2px,
+          rgba(255, 255, 255, 0.012) 4px
+        );
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      /* ── Selection ───────────────────────────────────── */
+      ::selection {
+        background: rgba(54, 208, 208, 0.25);
+        color: var(--c-white);
+      }
+
+      /* ── Scrollbar ───────────────────────────────────── */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--c-bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--c-border);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--c-muted);
+      }
+
+      /* ── Terminal window chrome ─────────────────────── */
+      .term-window {
+        background: var(--c-bg2);
+        border: 1px solid var(--c-border);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(54, 208, 208, 0.06),
+          0 25px 60px rgba(0, 0, 0, 0.6),
+          0 0 80px rgba(54, 208, 208, 0.04);
+      }
+
+      .term-titlebar {
+        background: #0c1117;
+        border-bottom: 1px solid var(--c-border);
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .term-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .term-body {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        line-height: 1.65;
+        padding: 20px 24px;
+      }
+
+      /* ── ASCII art ───────────────────────────────────── */
+      .ascii-art {
+        font-family: "JetBrains Mono", monospace;
+        font-size: clamp(6px, 1.1vw, 11px);
+        line-height: 1.2;
+        letter-spacing: 0.04em;
+        color: var(--c-cyan);
+        text-shadow: 0 0 16px rgba(54, 208, 208, 0.45);
+        white-space: pre;
+        display: block;
+      }
+
+      /* ── Cursor blink ────────────────────────────────── */
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 1.1em;
+        background: var(--c-cyan);
+        vertical-align: text-bottom;
+        animation: blink 1.1s step-end infinite;
+        box-shadow: 0 0 8px rgba(54, 208, 208, 0.8);
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ── Glow text ───────────────────────────────────── */
+      .glow-cyan {
+        color: var(--c-cyan);
+        text-shadow: 0 0 20px rgba(54, 208, 208, 0.5);
+      }
+      .glow-orange {
+        color: var(--c-orange);
+        text-shadow: 0 0 20px rgba(255, 143, 64, 0.4);
+      }
+
+      /* ── Copy button ─────────────────────────────────── */
+      .copy-btn {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        border: 1px solid var(--c-cyan);
+        color: var(--c-cyan);
+        background: transparent;
+        padding: 3px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+      }
+      .copy-btn:hover {
+        background: rgba(54, 208, 208, 0.12);
+        box-shadow: 0 0 12px rgba(54, 208, 208, 0.3);
+      }
+      .copy-btn.copied {
+        border-color: #7fd962;
+        color: #7fd962;
+        box-shadow: 0 0 10px rgba(127, 217, 98, 0.3);
+      }
+
+      /* ── Kbd tag ────────────────────────────────────── */
+      kbd {
+        font-family: "JetBrains Mono", monospace;
+        display: inline-block;
+        padding: 2px 8px;
+        background: rgba(54, 208, 208, 0.08);
+        border: 1px solid rgba(54, 208, 208, 0.25);
+        border-radius: 4px;
+        font-size: 12px;
+        color: var(--c-cyan);
+        line-height: 1.5;
+        white-space: nowrap;
+      }
+
+      /* ── Section divider ────────────────────────────── */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--c-border);
+      }
+
+      /* ── Feature card ───────────────────────────────── */
+      .feature-card {
+        background: var(--c-bg2);
+        border: 1px solid var(--c-border);
+        border-radius: 8px;
+        padding: 28px 24px;
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s,
+          transform 0.25s;
+        position: relative;
+        overflow: hidden;
+      }
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(54, 208, 208, 0.4),
+          transparent
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .feature-card:hover {
+        border-color: rgba(54, 208, 208, 0.35);
+        box-shadow:
+          0 8px 30px rgba(0, 0, 0, 0.4),
+          0 0 20px rgba(54, 208, 208, 0.06);
+        transform: translateY(-3px);
+      }
+      .feature-card:hover::before {
+        opacity: 1;
+      }
+
+      /* ── Tech badge ─────────────────────────────────── */
+      .tech-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(115, 184, 255, 0.08);
+        border: 1px solid rgba(115, 184, 255, 0.2);
+        color: var(--c-blue);
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .tech-badge:hover {
+        background: rgba(115, 184, 255, 0.16);
+        box-shadow: 0 0 12px rgba(115, 184, 255, 0.2);
+      }
+
+      /* ── Prompt line ────────────────────────────────── */
+      .prompt-user {
+        color: #7fd962;
+      }
+      .prompt-at {
+        color: var(--c-muted);
+      }
+      .prompt-host {
+        color: var(--c-cyan);
+      }
+      .prompt-path {
+        color: var(--c-blue);
+      }
+      .prompt-sign {
+        color: var(--c-orange);
+      }
+
+      /* ── Fade-up stagger ────────────────────────────── */
+      .fade-up {
+        opacity: 0;
+        animation: fadeUp 0.7s ease forwards;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(22px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ── Hero ambient glow ──────────────────────────── */
+      .hero-glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ╔══════════════════════════════════╗
+       ║  NAV                             ║
+       ╚══════════════════════════════════╝ -->
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 border-b border-ayu-border/50 backdrop-blur-md"
+      style="background: rgba(15, 20, 25, 0.85)"
+    >
+      <div
+        class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between"
+      >
+        <span
+          class="font-mono text-ayu-cyan text-sm font-medium tracking-wide"
+          style="text-shadow: 0 0 14px rgba(54, 208, 208, 0.45)"
+        >
+          <span class="text-ayu-muted">~/</span>whoami<span
+            class="text-ayu-orange font-bold"
+            >.ssh</span
+          >
+        </span>
+        <div class="flex items-center gap-4">
+          <a
+            href="#connect"
+            class="text-ayu-text hover:text-ayu-white text-sm transition-colors font-sans hidden sm:inline"
+            >Connect</a
+          >
+          <a
+            href="#features"
+            class="text-ayu-text hover:text-ayu-white text-sm transition-colors font-sans hidden sm:inline"
+            >Features</a
+          >
+          <a
+            href="https://github.com/WaxArsatia/whoami.ssh"
+            target="_blank"
+            rel="noopener"
+            class="flex items-center gap-2 font-mono text-xs px-3 py-1.5 rounded border border-ayu-border text-ayu-text hover:border-ayu-cyan hover:text-ayu-cyan transition-all"
+            aria-label="View on GitHub"
+          >
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"
+              />
+            </svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ╔══════════════════════════════════╗
+       ║  HERO                            ║
+       ╚══════════════════════════════════╝ -->
+    <section
+      class="relative min-h-screen flex flex-col justify-center overflow-hidden pt-20"
+    >
+      <!-- Ambient glows -->
+      <div
+        class="hero-glow w-96 h-96 -top-20 -left-20 opacity-20"
+        style="background: radial-gradient(circle, #36d0d0 0%, transparent 70%)"
+      ></div>
+      <div
+        class="hero-glow w-80 h-80 bottom-0 right-0 opacity-15"
+        style="background: radial-gradient(circle, #ff8f40 0%, transparent 70%)"
+      ></div>
+      <div
+        class="hero-glow w-64 h-64 top-1/2 right-1/4 opacity-10"
+        style="background: radial-gradient(circle, #73b8ff 0%, transparent 70%)"
+      ></div>
+
+      <div class="max-w-5xl mx-auto px-6 py-16 w-full">
+        <!-- ASCII art banner -->
+        <div class="mb-10 fade-up" style="animation-delay: 0.05s">
+          <pre class="ascii-art leading-tight">
+██╗    ██╗██╗  ██╗ ██████╗  █████╗ ███╗   ███╗██╗
+██║    ██║██║  ██║██╔═══██╗██╔══██╗████╗ ████║██║
+██║ █╗ ██║███████║██║   ██║███████║██╔████╔██║██║
+██║███╗██║██╔══██║██║   ██║██╔══██║██║╚██╔╝██║██║
+╚███╔███╔╝██║  ██║╚██████╔╝██║  ██║██║ ╚═╝ ██║██║
+ ╚══╝╚══╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚═╝</pre
+          >
+          <span
+            class="font-mono text-ayu-blue font-bold text-lg ml-1"
+            style="margin-left: 11ch"
+            >.ssh</span
+          >
+        </div>
+
+        <!-- Tagline -->
+        <div class="mb-2 fade-up" style="animation-delay: 0.15s">
+          <p class="font-mono text-ayu-muted text-sm">
+            <span class="prompt-user">denis</span
+            ><span class="prompt-at">@</span
+            ><span class="prompt-host">arsyatya</span
+            ><span class="prompt-path"> ~/portfolio</span
+            ><span class="prompt-sign"> $</span>
+            <span class="text-ayu-white ml-2">cat whoami</span>
+          </p>
+        </div>
+        <div class="mb-8 fade-up" style="animation-delay: 0.22s">
+          <h1
+            class="font-sans font-bold text-3xl sm:text-4xl text-ayu-white leading-tight"
+          >
+            Denis Arsyatya
+            <span
+              class="block text-lg sm:text-xl font-normal text-ayu-muted mt-1"
+            >
+              Backend Developer · Network Engineer · Linux SysAdmin
+            </span>
+          </h1>
+          <p class="font-mono text-ayu-orange mt-3 text-sm italic">
+            "In a world of variables, be a constant."
+          </p>
+        </div>
+
+        <!-- SSH connect box -->
+        <div id="connect" class="fade-up" style="animation-delay: 0.32s">
+          <p
+            class="font-mono text-ayu-muted text-xs uppercase tracking-widest mb-3"
+          >
+            ── Connect via SSH — whoami.denis.my.id
+          </p>
+          <div x-data="{ copied: false }" class="term-window max-w-xl">
+            <div class="term-titlebar">
+              <div class="term-dot" style="background: #f07178"></div>
+              <div class="term-dot" style="background: #ffb454"></div>
+              <div class="term-dot" style="background: #7fd962"></div>
+              <span class="ml-3 text-ayu-muted font-mono text-xs select-none"
+                >terminal</span
+              >
+            </div>
+            <div class="term-body">
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="flex-1 min-w-0">
+                  <span class="prompt-user">you</span>
+                  <span class="prompt-at">@</span>
+                  <span class="prompt-host">local</span>
+                  <span class="prompt-sign"> $</span>
+                  <span class="text-ayu-white ml-2 font-bold"
+                    >ssh whoami.denis.my.id</span
+                  >
+                </div>
+                <button
+                  @click="
+                  navigator.clipboard.writeText('ssh whoami.denis.my.id');
+                  copied = true;
+                  setTimeout(() => copied = false, 2000)
+                "
+                  :class="copied ? 'copied' : ''"
+                  class="copy-btn"
+                  aria-label="Copy SSH command"
+                >
+                  <span x-text="copied ? '✓ copied' : 'copy'"></span>
+                </button>
+              </div>
+              <div class="mt-2 text-ayu-muted text-xs">
+                <span class="text-ayu-green">→</span>
+                Welcome to <span class="text-ayu-cyan">whoami.ssh</span>
+                <span class="cursor ml-0.5"></span>
+              </div>
+            </div>
+          </div>
+          <p class="mt-3 text-ayu-muted font-mono text-xs">
+            No client install needed. Any SSH client works — macOS, Linux,
+            Windows (OpenSSH).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider max-w-5xl mx-auto" />
+
+    <!-- ╔══════════════════════════════════╗
+       ║  FEATURES / SECTIONS             ║
+       ╚══════════════════════════════════╝ -->
+    <section id="features" class="max-w-5xl mx-auto px-6 py-20">
+      <div class="mb-12">
+        <span
+          class="font-mono text-ayu-orange text-xs tracking-widest uppercase"
+          >// sections</span
+        >
+        <h2
+          class="font-sans font-bold text-2xl sm:text-3xl text-ayu-white mt-2"
+        >
+          What's inside
+        </h2>
+        <p class="text-ayu-text mt-2">
+          Five interactive sections, fully keyboard-navigable.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="feature-card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">⌂</span>
+            <span
+              class="font-mono text-ayu-muted text-xs border border-ayu-border px-2 py-0.5 rounded"
+              >key: 0</span
+            >
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-white mb-2">Home</h3>
+          <p class="text-ayu-text text-sm">
+            ASCII art banner, identity card, role summary, and navigation guide
+            to get you oriented.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">✦</span>
+            <span
+              class="font-mono text-ayu-muted text-xs border border-ayu-border px-2 py-0.5 rounded"
+              >key: 1</span
+            >
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-white mb-2">About</h3>
+          <p class="text-ayu-text text-sm">
+            Background, experience philosophy, and what drives the work —
+            backend, systems, and beyond.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">◈</span>
+            <span
+              class="font-mono text-ayu-muted text-xs border border-ayu-border px-2 py-0.5 rounded"
+              >key: 2</span
+            >
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-white mb-2">Skills</h3>
+          <p class="text-ayu-text text-sm">
+            Languages, frameworks, infrastructure, and databases — the full tech
+            stack at a glance.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">⬡</span>
+            <span
+              class="font-mono text-ayu-muted text-xs border border-ayu-border px-2 py-0.5 rounded"
+              >key: 3</span
+            >
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-white mb-2">Projects</h3>
+          <p class="text-ayu-text text-sm">
+            Highlighted open-source projects — from SSH-over-WebSocket tunnels
+            to AI-powered tools.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="flex items-start justify-between mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">✉</span>
+            <span
+              class="font-mono text-ayu-muted text-xs border border-ayu-border px-2 py-0.5 rounded"
+              >key: 4</span
+            >
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-white mb-2">Contact</h3>
+          <p class="text-ayu-text text-sm">
+            Email, GitHub, LinkedIn, and WakaTime — all ways to reach Denis,
+            rendered beautifully in-terminal.
+          </p>
+        </div>
+
+        <!-- Bonus card: atmosphere -->
+        <div
+          class="feature-card"
+          style="
+            background: linear-gradient(135deg, #131921 0%, #0f1a2a 100%);
+            border-color: rgba(54, 208, 208, 0.15);
+          "
+        >
+          <div class="mb-3">
+            <span class="font-mono text-ayu-cyan text-2xl leading-none">◎</span>
+          </div>
+          <h3 class="font-sans font-semibold text-ayu-cyan mb-2">
+            Ayu Dark Theme
+          </h3>
+          <p class="text-ayu-text text-sm">
+            Every pixel styled with the Ayu Dark palette — cyan, orange, and
+            blue on deep obsidian. Built with
+            <a
+              href="https://github.com/charmbracelet/lipgloss"
+              target="_blank"
+              rel="noopener"
+              class="text-ayu-blue hover:text-ayu-cyan transition-colors"
+              >lipgloss</a
+            >.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider max-w-5xl mx-auto" />
+
+    <!-- ╔══════════════════════════════════╗
+       ║  NAVIGATION KEYS                 ║
+       ╚══════════════════════════════════╝ -->
+    <section class="max-w-5xl mx-auto px-6 py-20">
+      <div class="mb-10">
+        <span
+          class="font-mono text-ayu-orange text-xs tracking-widest uppercase"
+          >// keybindings</span
+        >
+        <h2
+          class="font-sans font-bold text-2xl sm:text-3xl text-ayu-white mt-2"
+        >
+          Navigate the terminal
+        </h2>
+        <p class="text-ayu-text mt-2">
+          No mouse required. Every action has a key.
+        </p>
+      </div>
+
+      <div class="term-window max-w-2xl">
+        <div class="term-titlebar">
+          <div class="term-dot" style="background: #f07178"></div>
+          <div class="term-dot" style="background: #ffb454"></div>
+          <div class="term-dot" style="background: #7fd962"></div>
+          <span class="ml-3 font-mono text-xs text-ayu-muted select-none"
+            >keybindings.txt</span
+          >
+        </div>
+        <div class="term-body">
+          <div class="space-y-2 text-sm">
+            <div
+              class="border-b border-ayu-border pb-2 mb-3 flex gap-8 font-mono text-xs text-ayu-muted"
+            >
+              <span class="w-48">key</span>
+              <span>action</span>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap">
+              <span class="w-48 flex gap-1 flex-wrap"
+                ><kbd>tab</kbd> <span class="text-ayu-muted">/</span>
+                <kbd>shift+tab</kbd></span
+              >
+              <span class="text-ayu-text">Cycle through sections</span>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap">
+              <span class="w-48 flex gap-1"
+                ><kbd>0</kbd> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>
+                <kbd>4</kbd></span
+              >
+              <span class="text-ayu-text">Jump to section directly</span>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap">
+              <span class="w-48 flex gap-1"
+                ><kbd>↑</kbd> <kbd>↓</kbd>
+                <span class="text-ayu-muted">or</span> <kbd>k</kbd>
+                <kbd>j</kbd></span
+              >
+              <span class="text-ayu-text">Scroll content</span>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap">
+              <span class="w-48 flex gap-1"
+                ><kbd>g</kbd> <span class="text-ayu-muted">/</span>
+                <kbd>G</kbd></span
+              >
+              <span class="text-ayu-text">Scroll to top / bottom</span>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap">
+              <span class="w-48 flex gap-1"
+                ><kbd>q</kbd> <span class="text-ayu-muted">/</span>
+                <kbd>ctrl+c</kbd></span
+              >
+              <span class="text-ayu-text">Quit the session</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="divider max-w-5xl mx-auto" />
+
+    <!-- ╔══════════════════════════════════╗
+       ║  TECH STACK                      ║
+       ╚══════════════════════════════════╝ -->
+    <section class="max-w-5xl mx-auto px-6 py-20">
+      <div class="mb-10">
+        <span
+          class="font-mono text-ayu-orange text-xs tracking-widest uppercase"
+          >// built with</span
+        >
+        <h2
+          class="font-sans font-bold text-2xl sm:text-3xl text-ayu-white mt-2"
+        >
+          Tech stack
+        </h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-8">
+        <div>
+          <p
+            class="font-mono text-ayu-muted text-xs mb-4 uppercase tracking-widest"
+          >
+            Server
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tech-badge">Go</span>
+            <span class="tech-badge">charmbracelet/wish</span>
+            <span class="tech-badge">Bubble Tea</span>
+            <span class="tech-badge">lipgloss</span>
+            <span class="tech-badge">bubbles</span>
+          </div>
+        </div>
+
+        <div>
+          <p
+            class="font-mono text-ayu-muted text-xs mb-4 uppercase tracking-widest"
+          >
+            Protocol &amp; Infra
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="tech-badge">SSH (OpenSSH)</span>
+            <span class="tech-badge">Docker</span>
+            <span class="tech-badge">Nginx</span>
+            <span class="tech-badge">Linux</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Architecture callout -->
+      <div
+        class="mt-8 p-5 rounded-lg border border-ayu-border/50 bg-ayu-bg2/60 font-mono text-sm"
+      >
+        <span class="text-ayu-muted text-xs">// architecture</span>
+        <div class="mt-2 text-ayu-text leading-relaxed text-xs sm:text-sm">
+          <span class="text-ayu-cyan">wish</span> SSH server
+          <span class="text-ayu-muted mx-2">→</span>
+          <span class="text-ayu-orange">bubbletea</span> MVU runtime
+          <span class="text-ayu-muted mx-2">→</span>
+          <span class="text-ayu-blue">lipgloss</span> styled rendering
+          <span class="text-ayu-muted mx-2">→</span>
+          <span class="text-ayu-white">your terminal</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ╔══════════════════════════════════╗
+       ║  FOOTER                          ║
+       ╚══════════════════════════════════╝ -->
+    <footer class="border-t border-ayu-border mt-4">
+      <div class="max-w-5xl mx-auto px-6 py-12">
+        <div
+          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8"
+        >
+          <div>
+            <p class="font-mono text-ayu-cyan font-medium mb-1">
+              Denis Arsyatya
+            </p>
+            <p class="font-mono text-ayu-muted text-xs">
+              <a
+                href="mailto:waxarsatia@gmail.com"
+                class="hover:text-ayu-cyan transition-colors"
+                >waxarsatia@gmail.com</a
+              >
+              <span class="mx-2 text-ayu-border">·</span>
+              Indonesia
+            </p>
+          </div>
+
+          <div class="flex items-center gap-5">
+            <a
+              href="https://github.com/WaxArsatia"
+              target="_blank"
+              rel="noopener"
+              class="text-ayu-muted hover:text-ayu-cyan transition-colors"
+              aria-label="GitHub"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://linkedin.com/in/denis-arsyatya"
+              target="_blank"
+              rel="noopener"
+              class="text-ayu-muted hover:text-ayu-blue transition-colors"
+              aria-label="LinkedIn"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                />
+              </svg>
+            </a>
+            <a
+              href="https://wakatime.com/@WaxArsatia"
+              target="_blank"
+              rel="noopener"
+              class="text-ayu-muted hover:text-ayu-orange transition-colors"
+              aria-label="WakaTime"
+            >
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 17.5l-6-3.5V7h1.5v6.3l5.3 3.1-0.8 1.1z"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="mt-8 pt-6 border-t border-ayu-border/40 flex flex-col sm:flex-row justify-between gap-2 text-xs font-mono text-ayu-muted"
+        >
+          <span>
+            MIT License ·
+            <a
+              href="https://github.com/WaxArsatia/whoami.ssh"
+              class="hover:text-ayu-cyan transition-colors"
+              target="_blank"
+              rel="noopener"
+              >github.com/WaxArsatia/whoami.ssh</a
+            >
+          </span>
+          <span>
+            Built with <span class="text-ayu-orange">Go</span> +
+            <span class="text-ayu-cyan">charmbracelet</span>
+          </span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
