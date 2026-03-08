@@ -1,0 +1,8 @@
+# Binary
+whoami.ssh
+
+# SSH host keys
+.ssh/
+
+# GitHub
+.github
