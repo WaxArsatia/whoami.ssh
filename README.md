@@ -40,8 +40,7 @@ whoami.ssh/
 ├── main.go               # SSH server entry point (wish + bubbletea middleware)
 ├── go.mod
 ├── frontend/
-│   ├── index.html        # Static web landing page (Tailwind + Alpine.js)
-│   └── nginx.conf        # Nginx config: HTTPS + HTTP/2 + HTTP/3 (QUIC)
+│   └── index.html        # Static web landing page (Tailwind + Alpine.js)
 ├── internal/
 │   ├── data/
 │   │   └── profile.go    # Profile, TechStack, and Projects data
