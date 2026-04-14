@@ -1,6 +1,6 @@
 # whoami.ssh
 
-> An interactive SSH portfolio — visit it right from your terminal.
+Interactive portfolio served over SSH, written in Go with Charmbracelet's TUI stack.
 
 ## Live
 
@@ -13,97 +13,78 @@
 ssh denis.my.id
 ```
 
+## Overview
+
+This repository contains:
+
+- An SSH server that launches a terminal UI portfolio session.
+- A multi-view TUI (Home, About, Skills, Projects, Contact).
+- A static web landing page in `frontend/index.html`.
+- An example Nginx config in `nginx.conf` for the web domain setup.
+
 ## Features
 
-- Built with [charmbracelet/wish](https://github.com/charmbracelet/wish) — SSH server framework
-- Beautiful TUI powered by [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss](https://github.com/charmbracelet/lipgloss)
-- Ayu Dark color theme
-- 5 interactive sections: Home · About · Skills · Projects · Contact
-- Viewport scrolling, keyboard navigation, responsive layout
+- SSH server using `wish` + Bubble Tea middleware.
+- Keyboard controls: `tab` / `shift+tab` to switch views.
+- Section shortcuts: `0` to `4` for Home, About, Skills, Projects, and Contact.
+- Quit controls: `q` / `ctrl+c`.
+- Scrollable content areas for About, Skills, Projects, and Contact views.
+- Responsive layout updates on terminal resize.
+- Ayu Dark-inspired styling via Lip Gloss.
 
-## Navigation
+## Tech Stack
 
-| Key                    | Action                     |
-| ---------------------- | -------------------------- |
-| `tab` / `shift+tab`    | Cycle through sections     |
-| `0` – `4`              | Jump directly to a section |
-| `↑` / `↓` or `j` / `k` | Scroll content             |
-| `g` / `G`              | Scroll to top / bottom     |
-| `q` / `ctrl+c`         | Quit                       |
+- Go 1.25
+- `github.com/charmbracelet/wish`
+- `github.com/charmbracelet/bubbletea`
+- `github.com/charmbracelet/bubbles`
+- `github.com/charmbracelet/lipgloss`
+- `github.com/charmbracelet/log`
+- Frontend landing page: plain HTML with Tailwind Play CDN and Alpine.js CDN
 
-Section keys: `0` home · `1` about · `2` skills · `3` projects · `4` contact
+## Setup and Run
 
-## Project Structure
-
-```
-whoami.ssh/
-├── main.go               # SSH server entry point (wish + bubbletea middleware)
-├── go.mod
-├── frontend/
-│   └── index.html        # Static web landing page (Tailwind + Alpine.js)
-├── internal/
-│   ├── data/
-│   │   └── profile.go    # Profile, TechStack, and Projects data
-│   └── tui/
-│       ├── app.go        # Root model, tab bar, status bar, key handling
-│       ├── home.go       # Home / landing view
-│       ├── about.go      # About section (viewport)
-│       ├── skills.go     # Skills section (viewport)
-│       ├── projects.go   # Projects section (viewport)
-│       ├── contact.go    # Contact section (viewport)
-│       └── styles.go     # Ayu Dark palette + shared lipgloss styles
-└── whoami.ssh            # Compiled binary (generated after build)
-```
-
-## Running Locally
+Prerequisite: Go installed.
 
 ```bash
-# Requires Go
 go run .
+```
 
-# Connect (in another terminal) — default port is 2222 locally
+By default, the SSH server listens on `0.0.0.0:2222`.
+
+Connect from another terminal:
+
+```bash
 ssh -p 2222 localhost
 ```
 
-> The SSH host key is auto-generated at `.ssh/id_ed25519` on first run.
-
-To run on the standard SSH port 22 (like production):
+Optional flags:
 
 ```bash
-sudo go run . --port 22
-ssh localhost
+go run . --host 127.0.0.1 --port 2222
 ```
 
-## Docker
+The server is configured to use host key path `.ssh/id_ed25519`.
 
-```dockerfile
-FROM golang:1.26-alpine AS builder
-WORKDIR /app
-COPY . .
-RUN go build -o whoami.ssh .
+## Project Structure
 
-FROM alpine:latest
-WORKDIR /app
-COPY --from=builder /app/whoami.ssh .
-EXPOSE 22
-CMD ["./whoami.ssh", "--port", "22"]
+```text
+whoami.ssh/
+├── main.go
+├── go.mod
+├── go.sum
+├── nginx.conf
+├── frontend/
+│   └── index.html
+└── internal/
+    ├── data/
+    │   └── profile.go
+    └── tui/
+        ├── app.go
+        ├── home.go
+        ├── about.go
+        ├── skills.go
+        ├── projects.go
+        ├── contact.go
+        └── styles.go
 ```
-
-```bash
-docker build -t whoami-sh .
-# run on standard port 22
-docker run -p 22:22 whoami-sh
-```
-
-## Stack
-
-- **Go** — runtime
-- **[wish](https://github.com/charmbracelet/wish)** — SSH server framework
-- **[bubbletea](https://github.com/charmbracelet/bubbletea)** — TUI framework (MVU)
-- **[lipgloss](https://github.com/charmbracelet/lipgloss)** — terminal styling
-- **[bubbles](https://github.com/charmbracelet/bubbles)** — viewport component
-- **[log](https://github.com/charmbracelet/log)** — structured logging
-
-## License
-
-MIT — Denis Arsyatya (WaxArsatia)
